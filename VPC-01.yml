@@ -1,33 +1,33 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'vpc setup bySundhar'
+Description: vpc setup bySundhar
 
 Parameters:
 
   Environment:
     Type: String
     AllowedValues:
-    - Dev
-    - Production
+      - Dev
+      - Prod
 
   VpcName:
-      Type: String
+    Type: String
 
   VpcCIDR:
-      Type: String
+    Type: String
 
   publicSubnet1CIDR:
-      Type: String
+    Type: String
   publicSubnet2CIDR:
-      Type: String
+    Type: String
   publicSubnet3CIDR:
-      Type: String
+    Type: String
 
   privateSubnet1CIDR:
-      Type: String
+    Type: String
   privateSubnet2CIDR:
-      Type: String
+    Type: String
   privateSubnet3CIDR:
-      Type: String
+    Type: String
 
 Mappings:
 
@@ -40,161 +40,182 @@ Mappings:
       Index: 2
 
 Conditions:
-  Isprod: !Equals: [!Ref Environment, Production]
+  IsProd: !Equals
+    - !Ref Environment
+    - Prod
 
 Resources:
-  paramName: MyVPC
+  MyVPC:
     Type: AWS::EC2::VPC
-    properties:
+    Properties:
       CidrBlock: !Ref VpcCIDR
       Tags:
         - Key: Name
-          Value: !Sub
-            - ${VpcName}-${Environment}
+          Value: !Sub ${VpcName}-${Environment}
 
-  paramName: InternetGateway
+  InternetGateway:
     Type: AWS::EC2::InternetGateway
-    properties:
+    Properties:
       Tags:
         - Key: Name
-          Value: !Sub
-            - ${VpcName}-IGW-${Environment}
+          Value: !Sub ${VpcName}-IGW-${Environment}
 
-  paramName: VPCGatewayAttachment
+  VPCGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
-    properties:
+    Properties:
       VpcId: !Ref MyVPC
       InternetGatewayId: !Ref InternetGateway
 
-  
   publicsubnet1:
     Type: AWS::EC2::Subnet
-    properties:
+    Properties:
       VpcId: !Ref MyVPC
       CidrBlock: !Ref publicSubnet1CIDR
-      AvailabilityZone: !Select [!FindInMap [AZMap, AZ1, Index], !GetAZs '']
+      AvailabilityZone: !Select
+        - !FindInMap
+          - AZMap
+          - AZ1
+          - Index
+        - !GetAZs ''
       Tags:
         - Key: Name
-          Value: !Sub
-            - ${VpcName}-PublicSubnet1-${Environment}
+          Value: !Sub ${VpcName}-PublicSubnet1-${Environment}
 
   publicsubnet2:
     Type: AWS::EC2::Subnet
-    properties:
+    Properties:
       VpcId: !Ref MyVPC
       CidrBlock: !Ref publicSubnet2CIDR
-      AvailabilityZone: !Select [!FindInMap [AZMap, AZ2, Index], !GetAZs '']
+      AvailabilityZone: !Select
+        - !FindInMap
+          - AZMap
+          - AZ2
+          - Index
+        - !GetAZs ''
       Tags:
         - Key: Name
-          Value: !Sub
-            - ${VpcName}-PublicSubnet2-${Environment}
+          Value: !Sub ${VpcName}-PublicSubnet2-${Environment}
 
   publicsubnet3:
     Type: AWS::EC2::Subnet
-    Conditions: IsProd
-    properties:
+    Condition: IsProd
+    Properties:
       VpcId: !Ref MyVPC
       CidrBlock: !Ref publicSubnet3CIDR
-      AvailabilityZone: !Select [!FindInMap [AZMap, AZ3, Index], !GetAZs '']
+      AvailabilityZone: !Select
+        - !FindInMap
+          - AZMap
+          - AZ3
+          - Index
+        - !GetAZs ''
       Tags:
         - Key: Name
-          Value: !Sub
-            - ${VpcName}-PublicSubnet3-${Environment}    
+          Value: !Sub ${VpcName}-PublicSubnet3-${Environment}
 
   privatesubnet1:
     Type: AWS::EC2::Subnet
-    properties:              
+    Properties:
       VpcId: !Ref MyVPC
       CidrBlock: !Ref privateSubnet1CIDR
-      AvailabilityZone: !Select [!FindInMap [AZMap, AZ1, Index], !GetAZs '']
+      AvailabilityZone: !Select
+        - !FindInMap
+          - AZMap
+          - AZ1
+          - Index
+        - !GetAZs ''
       Tags:
         - Key: Name
-          Value: !Sub
-            - ${VpcName}-PrivateSubnet1-${Environment}
+          Value: !Sub ${VpcName}-PrivateSubnet1-${Environment}
 
   privatesubnet2:
     Type: AWS::EC2::Subnet
-    properties:
+    Properties:
       VpcId: !Ref MyVPC
       CidrBlock: !Ref privateSubnet2CIDR
-      AvailabilityZone: !Select [!FindInMap [AZMap, AZ2, Index], !GetAZs '']
+      AvailabilityZone: !Select
+        - !FindInMap
+          - AZMap
+          - AZ2
+          - Index
+        - !GetAZs ''
       Tags:
         - Key: Name
-          Value: !Sub
-            - ${VpcName}-PrivateSubnet2-${Environment}  
+          Value: !Sub ${VpcName}-PrivateSubnet2-${Environment}
 
   privatesubnet3:
     Type: AWS::EC2::Subnet
-    Conditions: IsProd
-    properties:
+    Condition: IsProd
+    Properties:
       VpcId: !Ref MyVPC
       CidrBlock: !Ref privateSubnet3CIDR
-      AvailabilityZone: !Select [!FindInMap [AZMap, AZ3, Index], !GetAZs '']
+      AvailabilityZone: !Select
+        - !FindInMap
+          - AZMap
+          - AZ3
+          - Index
+        - !GetAZs ''
       Tags:
         - Key: Name
-          Value: !Sub
-            - ${VpcName}-PrivateSubnet3-${Environment}  
+          Value: !Sub ${VpcName}-PrivateSubnet3-${Environment}
 
   publicrouteTable:
     Type: AWS::EC2::RouteTable
-    properties:
+    Properties:
       VpcId: !Ref MyVPC
       Tags:
         - Key: Name
-          Value: !Sub
-            - ${VpcName}-PublicRouteTable-${Environment}
+          Value: !Sub ${VpcName}-PublicRouteTable-${Environment}
 
   privateRouteTable:
     Type: AWS::EC2::RouteTable
-    properties:
+    Properties:
       VpcId: !Ref MyVPC
       Tags:
         - Key: Name
-          Value: !Sub
-            - ${VpcName}-PrivateRouteTable-${Environment}
-  
+          Value: !Sub ${VpcName}-PrivateRouteTable-${Environment}
+
   publicRoute:
     Type: AWS::EC2::Route
     DependsOn: VPCGatewayAttachment
-    properties:
+    Properties:
       RouteTableId: !Ref publicrouteTable
       DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !Ref InternetGateway 
+      GatewayId: !Ref InternetGateway
 
   publicSubnet1RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
-    properties:
+    Properties:
       SubnetId: !Ref publicsubnet1
-      RouteTableId: !Ref publicrouteTable   
+      RouteTableId: !Ref publicrouteTable
 
   publicSubnet2RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
-    properties:
+    Properties:
       SubnetId: !Ref publicsubnet2
-      RouteTableId: !Ref publicrouteTable 
+      RouteTableId: !Ref publicrouteTable
 
   publicSubnet3RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
-    Conditions: IsProd
-    properties:
+    Condition: IsProd
+    Properties:
       SubnetId: !Ref publicsubnet3
-      RouteTableId: !Ref publicrouteTable 
+      RouteTableId: !Ref publicrouteTable
 
   privateSubnet1RouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation   
-    properties:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
       SubnetId: !Ref privatesubnet1
-      RouteTableId: !Ref privateRouteTable  
+      RouteTableId: !Ref privateRouteTable
 
   privateSubnet2RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
-    properties:
+    Properties:
       SubnetId: !Ref privatesubnet2
-      RouteTableId: !Ref privateRouteTable  
+      RouteTableId: !Ref privateRouteTable
 
   privateSubnet3RouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation   
-    Conditions: IsProd
-    properties:
-      SubnetId: !Ref privatesubnet3   
-      RouteTableId: !Ref privateRouteTable  
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: IsProd
+    Properties:
+      SubnetId: !Ref privatesubnet3
+      RouteTableId: !Ref privateRouteTable
